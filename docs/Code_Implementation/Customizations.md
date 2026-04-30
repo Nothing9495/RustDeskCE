@@ -1,17 +1,17 @@
 # Customizations
 ## Changes
- This customized edition has been made some changes, which have been listed below, to adapt repo owner's needs.
+This customized edition includes the following changes to meet the repository owner's needs.
 |Function/Variables/Module|Where is it?|What changed?|Details|Remark|
 |:------|:-------------:|:------:|:------:|:------|
-|RENDEZVOUS_SERVERS|libs/hbb_common/config.rs|It's value|none|Change default server|
-|RS_PUB_KEY|libs/hbb_common/config.rs|It's value|none|Change default secret key|
-|get_auto_id()|libs/hbb_common/config.rs|Implementation|See [Detailed Implementations](#detailed-implementaions)|Use custom id generating logic|
-|set_permanent_password()<br>get_permanent_password()|libs/hbb_common/config.rs|Implementation|See [Detailed Implementations](#detailed-implementaions)|Set fixed permanent password|
-|start_listen_ipc_thread()|src/flutter.rs|Implementation|`start_listen_ipc(true)`-><br>`start_listen_ipc(false)`|Disable Connection Manager Panel|
-|start_tray()|src/tray.rs|Implementation|`if crate... == "Y"`-><br>`if true`|Disable system tray in Windows|
-|global_hotkey|src/global_hotkey.rs<br>src/lib.rs<br>src/core_main.rs<br>src/server.rs|New Module|See [@Global_Hotkey_Implementation.md](@Global_Hotkey_Implementation.md)|Add hotkey to call RustDesk main window|
+|RENDEZVOUS_SERVERS|libs/hbb_common/config.rs|Its value|N/A|Change the default server address|
+|RS_PUB_KEY|libs/hbb_common/config.rs|Its value|N/A|Change the default secret key|
+|get_auto_id()|libs/hbb_common/config.rs|Implementation|See [Detailed Implementations](#detailed-implementations)|Use custom ID generation logic|
+|set_permanent_password()<br>get_permanent_password()|libs/hbb_common/config.rs|Implementation|See [Detailed Implementations](#detailed-implementations)|Set a fixed permanent password|
+|start_listen_ipc_thread()|src/flutter.rs|Implementation|`start_listen_ipc(true)`-><br>`start_listen_ipc(false)`|Disable the Connection Manager panel|
+|start_tray()|src/tray.rs|Implementation|`if crate... == "Y"`-><br>`if true`|Disable the system tray on Windows|
+|global_hotkey|src/global_hotkey.rs<br>src/lib.rs<br>src/core_main.rs<br>src/server.rs|New module|See [@Global_Hotkey_Implementation.md](@Global_Hotkey_Implementation.md)|Add a hotkey to open the RustDesk main window|
 
-## Detailed Implementaions
+## Detailed Implementations
 ### get_auto_id()
 **New Implementation:**
 ```rust
@@ -78,7 +78,7 @@ fn get_auto_id() -> Option<String> {
 ### set_permanent_password() and get_permanent_password()
 **New Implementation:**
 > [!CAUTION]
-> DO NOT use password relates to your online accounts!
+> DO NOT use a password related to your online accounts!
 ```rust
 pub fn set_permanent_password(password: &str) {
     return;
