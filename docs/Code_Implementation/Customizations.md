@@ -77,6 +77,8 @@ fn get_auto_id() -> Option<String> {
 ```
 ### set_permanent_password() and get_permanent_password()
 **New Implementation:**
+> [!CAUTION]
+> DO NOT use password relates to your online accounts!
 ```rust
 pub fn set_permanent_password(password: &str) {
     return;
@@ -87,8 +89,6 @@ pub fn get_permanent_password() -> String {
     FIXED_PWD.to_string()
 }
 ```
-> [!CAUTION]
-> DO NOT use password relates to your online accounts!
 **Original Implementation:**
 ```rust
 pub fn set_permanent_password(password: &str) {
