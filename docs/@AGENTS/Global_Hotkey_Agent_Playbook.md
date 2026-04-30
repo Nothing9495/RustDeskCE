@@ -1,23 +1,23 @@
 # Global_Hotkey_Agent_Playbook.md
 
 ## Objective
-Implement and reliably maintain the global hotkey `Shift+Alt+R` on Windows:
-- Pressing it at any time brings up the RustDesk main window
-- If the main window does not exist, start a new instance
-- The hotkey must keep working even after the main window is closed
+Implement the Windows global hotkey `Shift+Alt+R` and keep it stable:
+- Bring up the RustDesk main window at any time
+- Start a new instance when no window exists
+- Keep the hotkey working after the main window is closed
 
 ## Scope
 - Platform: Windows only
-- Non-target platforms: Android, iOS, macOS, Linux (no behavior changes)
+- Non-target platforms: Android, iOS, macOS, Linux remain unchanged
 
 ---
 
 ## Core Implementation Rules
-1. Hotkey listening must be initialized in the `core_main()` entry, before argument dispatch.
+1. Initialize hotkey listening in `core_main()` before argument dispatch.
 2. Use `rdev::listen()` (`WH_KEYBOARD_LL`) for listening; do not rely on `RegisterHotKey`.
-3. On trigger, prioritize directly bringing an existing window to foreground (`FindWindowW + TOPMOST trick`), rather than depending only on spawning a new process.
-4. On Windows, if IPC startup fails in the `--server` branch, do not `exit(-1)`; otherwise the hotkey thread dies with the process.
-5. Use `Once` to guarantee one listener registration per process and avoid duplicate threads.
+3. On trigger, bring an existing window to foreground first (`FindWindowW + TOPMOST trick`); do not rely only on a spawned process.
+4. On Windows, do not `exit(-1)` when IPC startup fails in the `--server` branch.
+5. Use `Once` to register the listener once per process.
 
 ---
 
@@ -34,22 +34,22 @@ mod global_hotkey;
 ### 2) Global Hotkey Module
 Create `src/global_hotkey.rs`:
 - `start_hotkey_listener()`: spawn a new thread + `rdev::listen`
-- Manually track `Shift` / `Alt` state
-- Trigger when `KeyR` is pressed and modifier state matches
+- Track `Shift` / `Alt` state manually
+- Trigger when `KeyR` matches the modifier state
 - Call `show_or_launch_main_window()`
 
 Window activation strategy:
 - If window is found:
   - `FindWindowW("FLUTTER_RUNNER_WIN32_WINDOW", app_name)`
-  - If minimized, call `ShowWindow(SW_RESTORE)` first
+    - Restore first when minimized with `ShowWindow(SW_RESTORE)`
   - `SetWindowPos(HWND_TOPMOST)`
   - `SetForegroundWindow`
   - `BringWindowToTop`
   - `SetWindowPos(HWND_NOTOPMOST)`
-- If window is not found: use `crate::run_me::<&str>(vec![])` as fallback
+- If window is not found, use `crate::run_me::<&str>(vec![])` as fallback
 
 ### 3) Entry Initialization Timing
-In `src/core_main.rs`, initialize after `init_log()` and before argument dispatch:
+In `src/core_main.rs`, start the listener after `init_log()` and before argument dispatch:
 
 ```rust
 #[cfg(windows)]
@@ -65,67 +65,67 @@ In `src/core_main.rs`, initialize after `init_log()` and before argument dispatc
 ### 4) Keep `--server` Alive on Windows
 In the IPC startup failure branch in `src/server.rs`:
 - Non-Windows: keep existing `exit(-1)` behavior
-- Windows: log `warn` only and continue running
+- Windows: log `warn` and continue running
 
-Goal: prevent `--server` from exiting due to IPC conflicts, which would kill the hotkey thread.
+Goal: keep `--server` alive so the hotkey thread remains active.
 
 ---
 
 ## Why This Approach (Short)
-- `RegisterHotKey` is unstable in this runtime shape; historically it often "registered successfully but never triggered".
-- `rdev::listen` uses a low-level keyboard hook and does not require a window message pump; it is more reliable in this target scenario.
-- Activating via a spawned process is often blocked by Windows foreground focus policy; direct in-process window activation works better.
-- The hotkey thread must live in a long-running user-session process; `--server` must not exit due to IPC contention.
+- `RegisterHotKey` is unreliable in this runtime shape.
+- `rdev::listen` avoids the window message pump and is more stable here.
+- Spawned-process activation is limited by Windows foreground policy.
+- The listener must stay in a long-running user-session process.
 
 ---
 
 ## Agent Execution Checklist
-- [ ] `src/global_hotkey.rs` added successfully
+- [ ] `src/global_hotkey.rs` added
 - [ ] Windows-gated module declared in `src/lib.rs`
-- [ ] Listener startup via `Once` added at entry in `src/core_main.rs`
-- [ ] Windows IPC failure in `src/server.rs` no longer exits process
-- [ ] Non-Windows build paths remain unaffected (isolated by `cfg`)
+- [ ] Listener startup via `Once` added in `src/core_main.rs`
+- [ ] Windows IPC failure in `src/server.rs` no longer exits
+- [ ] Non-Windows build paths remain isolated by `cfg`
 
 ---
 
 ## Acceptance Criteria
-1. After startup, when a `--server` process exists, pressing `Shift+Alt+R` brings up the main window.
-2. If the main window is open but covered/minimized, the hotkey reliably brings it to front.
-3. After closing the main window, pressing the hotkey still reopens it.
-4. Logs contain listener startup messages.
+1. When a `--server` process exists, pressing `Shift+Alt+R` opens the main window.
+2. If the main window is covered or minimized, the hotkey brings it to front.
+3. After closing the main window, the hotkey reopens it.
+4. Logs contain listener startup output.
 5. Windows build passes (including flutter-related feature combinations).
 
 ---
 
 ## Common Failures and Fixes
 1. Hotkey does not respond and no logs appear
-- Cause: listener code is not executed in the real entry path.
-- Fix: ensure startup is in `core_main()` before argument dispatch, and remind user to check RustDesk logs in `%APPDATA%\RustDesk`
+- Cause: listener code does not run in the real entry path.
+- Fix: start it in `core_main()` before argument dispatch. Check RustDesk logs in `%APPDATA%\RustDesk`.
 
 2. Hotkey logs appear but window is not brought to front
-- Cause: only `run_me()` is used; focus steal fails from a newly spawned process.
-- Fix: perform direct Win32 foregrounding in current process; keep `run_me()` only as fallback when no window exists.
+- Cause: only `run_me()` runs; a spawned process cannot reliably take focus.
+- Fix: foreground the existing window in the current process. Keep `run_me()` only as fallback.
 
 3. Hotkey stops working after main window is closed
-- Cause: `--server` exits on IPC startup failure, and the listener thread disappears.
-- Fix: on Windows, do not exit on IPC failure; log warning and continue.
+- Cause: `--server` exits on IPC startup failure, which kills the listener.
+- Fix: on Windows, keep running and log a warning.
 
 4. Listener registered in service Session 0 is completely ineffective
 - Cause: Session 0 cannot intercept keyboard input from interactive user sessions.
-- Fix: listener must start in a user-session process (`core_main()` entry path).
+- Fix: start the listener in a user-session process via `core_main()`.
 
 ---
 
 ## Minimal Regression Steps
-1. Start the program and verify `--server` is alive.
+1. Start the program and verify `--server` is running.
 2. Press `Shift+Alt+R` from any desktop-focused application.
-3. After opening the main window, minimize it and press the hotkey again to verify foregrounding.
-4. Close the main window, wait 2-3 seconds, then press the hotkey to verify reopen behavior.
+3. Minimize the main window and press the hotkey again.
+4. Close the main window, wait 2-3 seconds, then press the hotkey again.
 5. Check logs for listener startup and trigger records.
 
 ---
 
-## Do Not Do These (For Agents)
+## Do Not Do These
 - Do not revert to `RegisterHotKey` + message-window implementation.
 - Do not register the listener in Session 0 service threads.
 - Do not call `process::exit(-1)` on Windows IPC startup failure.
@@ -175,7 +175,7 @@ std::thread::spawn(move || {
     }
 });
 ```
-### Resuable Global_Hotkey Module
+### Reusable Global_Hotkey Module
 ```rust
 // src/global_hotkey.rs
 // Global hotkey listener for opening the main window via Shift+Alt+R.
@@ -253,14 +253,12 @@ fn show_or_launch_main_window() {
         let hwnd = FindWindowW(class.as_ptr(), title.as_ptr());
 
         if !hwnd.is_null() {
-            // Window exists — restore + force-foreground.
-            // 1. Restore from minimized state.
+            // Window exists. Restore first, then force foreground.
             if IsIconic(hwnd) != 0 {
                 ShowWindow(hwnd, SW_RESTORE);
             }
 
-            // 2. Briefly make topmost so SetForegroundWindow succeeds
-            //    and the window reliably comes to the foreground.
+            // Make it topmost briefly so SetForegroundWindow succeeds.
             SetWindowPos(
                 hwnd,
                 HWND_TOPMOST,
@@ -270,7 +268,7 @@ fn show_or_launch_main_window() {
             SetForegroundWindow(hwnd);
             BringWindowToTop(hwnd);
 
-            // 3. Remove topmost so it doesn't stay pinned above all other windows.
+            // Remove topmost so it does not stay pinned above all other windows.
             SetWindowPos(
                 hwnd,
                 HWND_NOTOPMOST,
@@ -280,7 +278,7 @@ fn show_or_launch_main_window() {
 
             // log::info!("global_hotkey: main window activated");
         } else {
-            // No existing window — launch a new instance.
+            // No existing window. Launch a new instance.
             // log::info!("global_hotkey: no existing window, launching via run_me");
             crate::run_me::<&str>(vec![]).ok();
         }
