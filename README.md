@@ -24,7 +24,9 @@ set "rustdeskMsi="
 for %%f in ("%WorkDir%rustdesk-*.msi") do (
   if exist "%%f" (
     set "rustdeskMsi=%%f"
-  ) else (
+  )
+  else
+  (
     echo RustDesk MSI package not found!
     echo Press any key to exit...
     pause >nul
@@ -42,7 +44,3 @@ if !errorlevel! neq 0 (
 start "" "%ProgramFiles%\RustDesk\RustDesk.exe" --server
 ```
 4. Run script with administrator privillege.
-5. Use `LShift+LAlt+R` to show RustDesk main window
-
-## Further Instructions
-For anyone who wants to make a CE by himself, see [Customizations.md](docs/Code_Implementation/Customizations.md)
