@@ -49,6 +49,31 @@ fn get_auto_id() -> Option<String> {
 ```
 **Original Implementation:**
 ```rust
+fn get_auto_id() -> Option<String> {
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    {
+        return Some(
+            rand::thread_rng()
+                .gen_range(1_000_000_000..2_000_000_000)
+                .to_string(),
+        );
+    }
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        let mut id = 0u32;
+        if let Ok(Some(ma)) = mac_address::get_mac_address() {
+            for x in &ma.bytes()[2..] {
+                id = (id << 8) | (*x as u32);
+            }
+            id &= 0x1FFFFFFF;
+            log::info!("Generated id {}", id);
+            Some(id.to_string())
+        } else {
+            None
+        }
+    }
+}
 ```
 ### set_permanent_password() and get_permanent_password()
 **New Implementation:**
