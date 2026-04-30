@@ -177,6 +177,7 @@ std::thread::spawn(move || {
 ```
 ### Resuable Global_Hotkey Module
 ```rust
+// src/global_hotkey.rs
 // Global hotkey listener for opening the main window via Shift+Alt+R.
 // Only compiled on Windows (non-Android, non-iOS).
 //
