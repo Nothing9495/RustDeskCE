@@ -6,9 +6,9 @@ on:
     paths-ignore:
     - "docs/**"
     - "README.md"
-  push:
-    branches:
-      - master
+  # push:
+  #   branches:
+  #     - master
     paths-ignore:
       - ".github/**"
       - "docs/**"
