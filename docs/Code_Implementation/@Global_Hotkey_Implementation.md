@@ -1,4 +1,4 @@
-# @Modifications.md — 全局热键 Shift+Alt+R 唤起主界面
+# @Global_Hotkey_Implementation.md — 全局热键 Shift+Alt+R 唤起主界面
 
 > **日期**: 2026-04-29  
 > **功能**: 捕获键盘快捷键 `Shift+Alt+R` 打开 RustDesk 主界面  
