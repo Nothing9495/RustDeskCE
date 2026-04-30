@@ -907,31 +907,39 @@ impl Config {
         }
     }
 
-    // MARK: ID generation logic:
+    // MARK: BEGIN ID generation logic
     fn get_auto_id() -> Option<String> {
         #[cfg(any(target_os = "android", target_os = "ios"))]
         {
             return Some(format!(
-                "Mobile-{:04X}",
-                rand::thread_rng().gen_range(0x1000..0x10000)
+                "RDM-{:05X}",
+                rand::thread_rng().gen_range(0x10000..0x100000)
             ));
         }
 
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
         {
+            #[cfg(target_os = "windows")]
+            const OS_SUFFIX: &str = "W";
+            #[cfg(target_os = "linux")]
+            const OS_SUFFIX: &str = "L";
+            #[cfg(target_os = "macos")]
+            const OS_SUFFIX: &str = "X";
+
             let mut id = 0u32;
             if let Ok(Some(ma)) = mac_address::get_mac_address() {
                 for x in &ma.bytes()[2..] {
                     id = (id << 8) | (*x as u32);
                 }
-                id = (id % 0xF000) + 0x1000;
-                Some(format!("Desktop-{:04X}", id))
+                id = (id % 0xF0000) + 0x10000;
+                Some(format!("RDD-{:05X}{OS_SUFFIX}", id))
             } else {
-                let id = rand::thread_rng().gen_range(0x1000..0x10000);
-                Some(format!("Desktop-{:04X}", id))
+                let id = rand::thread_rng().gen_range(0x10000..0x100000);
+                Some(format!("RDD-{:05X}{OS_SUFFIX}", id))
             }
         }
     }
+    // MARK: END ID generation logic
 
     pub fn get_auto_password(length: usize) -> String {
         Self::get_auto_password_with_chars(length, CHARS)
