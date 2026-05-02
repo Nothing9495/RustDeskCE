@@ -1,5 +1,5 @@
 # RustDeskCE - A fork of RustDesk
-This repo is a fork of [RustDesk](https://github.com/rustdesk/rustdesk), thanks for their excellent works!
+This repo is a clone of [RustDesk](https://github.com/rustdesk/rustdesk), thanks for their excellent works!
 <p align="center">
   <img src="res/logo-header.svg" alt="RustDesk - Customized Edition"><br>
 </p>
