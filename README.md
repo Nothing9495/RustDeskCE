@@ -13,7 +13,7 @@ This repo is a fork of [RustDesk](https://github.com/rustdesk/rustdesk), thanks 
 1. Fork or clone this repository, then make changes based on [Customizations.md](docs/Code_Implementation/Customizations.md), or modify it yourself.
 2. Push your code to Github, make sure Github Actions has R/W permission.
 3. In Github Actions, run Flutter Manually Build workflow.
-4. You can also set up your own build environment; see [RustDesk](https://github.com/rustdesk/rustdesk/blob/master/README.md) for detailed instructions.
+4. You can also set up your own build environment; see [RustDesk](https://github.com/rustdesk/rustdesk/blob/master/README.md#raw-steps-to-build) offical guidiance for detailed instructions.
 
 ## Silent deployment guidiance
 
