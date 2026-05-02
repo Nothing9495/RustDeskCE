@@ -6,8 +6,14 @@ This repo is a fork of [RustDesk](https://github.com/rustdesk/rustdesk), thanks 
 
 > [!Caution]
 > **Misuse Disclaimer:** <br>
-> The developers of RustDesk do not condone or support any unethical or illegal use of this software. Misuse, such as unauthorized access, control or invasion of privacy, is strictly against our guidelines. The authors are not responsible for any misuse of the application.
-> The customized edition is available to the public only for learning purposes. Do not use this edition for illegal activities.
+> The developers of RustDesk **do not condone or support any unethical or illegal use of this software**. Misuse, such as unauthorized access, control or invasion of privacy, is strictly against our guidelines. The authors are not responsible for any misuse of the application.
+> The customized edition is available to the public only for learning purposes. **Do not** use this edition for illegal activities.
+
+## How to build
+1. Fork or clone this repository, then make changes based on [Customizations.md](docs/Code_Implementation/Customizations.md), or modify it yourself.
+2. Push your code to Github, make sure Github Actions has R/W permission.
+3. In Github Actions, run Flutter Manually Build workflow.
+4. You can also set up your own build environment; see [RustDesk](github.com/rustdesk/rustdesk/blob/master/README.md) for detailed instructions.
 
 ## Silent deployment guidiance
 
