@@ -15,6 +15,7 @@ This customized edition includes the following changes to meet the repository ow
 ### get_auto_id()
 > [!NOTE]
 > This new Implementation may not work on computer running offical RustDesk Server OSS. To resolve this, see [RustDeskServerCE](https://github.com/Nothing9495/RustDeskServerCE) 
+
 **New Implementation:**
 ```rust
 fn get_auto_id() -> Option<String> {
