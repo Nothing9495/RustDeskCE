@@ -3,6 +3,16 @@
 ## Objective
 Use this playbook to apply repository customizations in a controlled, confirm-first workflow. It contains complete implementation snippets and mandatory pre-execution confirmations.
 
+## Restrictions
+- This playbook is written for **RustDesk v1.4.6**, which is not always compatiable for newer versions. 
+- For a agent who is performing this playbook, **all changes should be made according to Detailed Implementations sections**, and there's no alternative way to do it. 
+- Note that this playbook might be outdated for newer versions of RustDesk, in that case, **ask the user for further instructions first**.
+- Keep non-Windows behavior unchanged; use proper `cfg` guards.
+- Do not commit or push without explicit user approval.
+- Do not make any changes to unrelated code files.
+- Do not try to examine code by `cargo` or other toolchain, which is very likely to be unavailable in current environment.
+
+
 ## Reference
 For hotkey-related changes, use: [Global_Hotkey_Agent_Playbook.md](Global_Hotkey_Agent_Playbook.md)
 
@@ -173,14 +183,6 @@ Input rules:
 - If fixed password replacement is selected, request the exact value of `<Custom Password>` and warn the user not to reuse any online-account password.
 - If the user declines to provide `<Custom Password>`, just keep asking him. If the user persists, just refuse to make any customizations to the current project.
 - If the user chosed `Do not show system tray on Windows` without choosing `Use LShift+LAlt+R to open RustDesk`, prompt the user use LShift+LAlt+R to open RustDesk would be a nice alternative to open RustDesk, then ask for further instructions. If the user declines, just continue.
-
----
-
-## Safety & Constraints
-- Keep non-Windows behavior unchanged; use proper `cfg` guards.
-- Do not commit or push without explicit user approval.
-- Do not make any changes to unrelated code files.
-- Do not try to examine code by `cargo` or other toolchain, which is very likely to be unavailable in current environment.
 
 ---
 
