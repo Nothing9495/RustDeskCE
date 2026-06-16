@@ -1135,6 +1135,10 @@ impl InvokeUiSession for FlutterHandler {
                     ("message", json!(&opened.message)),
                     ("pid", json!(opened.pid)),
                     ("service_id", json!(&opened.service_id)),
+                    (
+                        "replay_terminal_output",
+                        json!(opened.replay_terminal_output),
+                    ),
                 ];
                 if !opened.persistent_sessions.is_empty() {
                     event_data.push(("persistent_sessions", json!(opened.persistent_sessions)));
@@ -1576,7 +1580,6 @@ pub mod connection_manager {
         }
     }
 
-    // MARK: Remote Control Connection Manager Panel
     #[inline]
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     pub fn start_cm_no_ui() {
@@ -1586,7 +1589,6 @@ pub mod connection_manager {
     #[inline]
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     fn start_listen_ipc_thread() {
-        // start_listen_ipc(true);
         start_listen_ipc(false);
     }
 

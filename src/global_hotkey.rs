@@ -1,3 +1,4 @@
+// src/global_hotkey.rs
 // Global hotkey listener for opening the main window via Shift+Alt+R.
 // Only compiled on Windows (non-Android, non-iOS).
 //
@@ -10,9 +11,8 @@ use hbb_common::log;
 use rdev::{listen, Event, EventType, Key};
 #[cfg(windows)]
 use winapi::um::winuser::{
-    BringWindowToTop, FindWindowW, IsIconic, SetForegroundWindow,
-    SetWindowPos, ShowWindow, HWND_NOTOPMOST, HWND_TOPMOST, SW_RESTORE,
-    SWP_NOMOVE, SWP_NOSIZE,
+    BringWindowToTop, FindWindowW, IsIconic, SetForegroundWindow, SetWindowPos, ShowWindow,
+    HWND_NOTOPMOST, HWND_TOPMOST, SWP_NOMOVE, SWP_NOSIZE, SW_RESTORE,
 };
 
 /// Start a background thread that listens for Shift+Alt+R globally
@@ -30,7 +30,6 @@ pub fn start_hotkey_listener() {
                     Key::Alt | Key::AltGr => alt = true,
                     Key::KeyR => {
                         if shift && alt {
-                            // log::info!("global_hotkey: Shift+Alt+R triggered");
                             show_or_launch_main_window();
                         }
                     }
@@ -73,35 +72,36 @@ fn show_or_launch_main_window() {
         let hwnd = FindWindowW(class.as_ptr(), title.as_ptr());
 
         if !hwnd.is_null() {
-            // Window exists — restore + force-foreground.
-            // 1. Restore from minimized state.
+            // Window exists. Restore first, then force foreground.
             if IsIconic(hwnd) != 0 {
                 ShowWindow(hwnd, SW_RESTORE);
             }
 
-            // 2. Briefly make topmost so SetForegroundWindow succeeds
-            //    and the window reliably comes to the foreground.
+            // Make it topmost briefly so SetForegroundWindow succeeds.
             SetWindowPos(
                 hwnd,
                 HWND_TOPMOST,
-                0, 0, 0, 0,
+                0,
+                0,
+                0,
+                0,
                 SWP_NOMOVE | SWP_NOSIZE,
             );
             SetForegroundWindow(hwnd);
             BringWindowToTop(hwnd);
 
-            // 3. Remove topmost so it doesn't stay pinned above all other windows.
+            // Remove topmost so it does not stay pinned above all other windows.
             SetWindowPos(
                 hwnd,
                 HWND_NOTOPMOST,
-                0, 0, 0, 0,
+                0,
+                0,
+                0,
+                0,
                 SWP_NOMOVE | SWP_NOSIZE,
             );
-
-            // log::info!("global_hotkey: main window activated");
         } else {
-            // No existing window — launch a new instance.
-            // log::info!("global_hotkey: no existing window, launching via run_me");
+            // No existing window. Launch a new instance.
             crate::run_me::<&str>(vec![]).ok();
         }
     }
